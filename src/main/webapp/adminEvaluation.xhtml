@@ -1,0 +1,51 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+<h:body>
+    <h:form>
+        <h2>Admin Panel: Manage Evaluations</h2>
+
+        <h:dataTable value="#{adminEvaluationBean.allEvaluations}" var="evaluation" border="1">
+            <h:column>
+                <f:facet name="header">ID Evaluations:</f:facet>
+                #{evaluation.id}
+            </h:column>
+            <h:column>
+                <f:facet name="header">Student</f:facet>
+                #{evaluation.student.username} - #{evaluation.student.id}
+            </h:column>
+            <h:column>
+                <f:facet name="header">Teacher</f:facet>
+                #{evaluation.teacher.username} - #{evaluation.teacher.id}
+            </h:column>
+            <h:column>
+                <f:facet name="header">Activity</f:facet>
+                #{evaluation.activity}
+            </h:column>
+            <h:column>
+                <f:facet name="header">Activity Type</f:facet>
+                #{evaluation.activityType}
+            </h:column>
+            <h:column>
+                <f:facet name="header">Grade32131</f:facet>
+                #{evaluation.grade}
+            </h:column>
+            <h:column>
+                <f:facet name="header">Comment</f:facet>
+                #{evaluation.comment}
+            </h:column>
+            <h:column>
+                <f:facet name="header">TimeStamp: </f:facet>
+                #{evaluation.timestamp}
+            </h:column>
+            <h:column>
+                <h:commandButton value="Delete" action="#{evaluationBean.deleteEvaluation(evaluation.id)}" />
+            </h:column>
+        </h:dataTable>
+
+        <!-- Display JSON Data -->
+        <h3>Evaluations in JSON Format</h3>
+        <h:outputText value="#{adminEvaluationBean.evaluationsAsJson}" escape="false" />
+    </h:form>
+</h:body>
+</html>

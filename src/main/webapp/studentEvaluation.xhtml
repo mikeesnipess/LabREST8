@@ -1,0 +1,39 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+<h:body>
+    <h:form>
+        <!-- Input field for activity -->
+        <h:outputLabel value="Activity:" />
+        <h:inputText value="#{evaluationBean.activity}" placeholder="Activity" />
+
+        <!-- Input field for activity type -->
+        <h:outputLabel value="Activity Type:" />
+        <h:inputText value="#{evaluationBean.activityType}" placeholder="Activity Type" />
+
+        <!-- Input field for grade -->
+        <h:outputLabel value="Grade:" />
+        <h:inputText value="#{evaluationBean.grade}" placeholder="Grade" />
+
+        <!-- Input field for comment -->
+        <h:outputLabel value="Comment:" />
+        <h:inputTextarea value="#{evaluationBean.comment}" placeholder="Comment" />
+
+        <!-- Dropdown for selecting a teacher -->
+        <h:selectOneMenu value="#{evaluationBean.teacher}">
+            <f:selectItems value="#{evaluationBean.teachers}" var="teacher"
+                           itemValue="#{teacher}" itemLabel="#{teacher.username}" />
+            <f:converter converterId="userConverter"/>
+        </h:selectOneMenu>
+
+
+
+        <!-- Button to submit the evaluation -->
+        <h:commandButton value="Submit" action="#{evaluationBean.submitEvaluation}" />
+
+        <!-- Success message display -->
+        <h:outputText value="#{evaluationBean.successMessage}" rendered="#{not empty evaluationBean.successMessage}" />
+        <h:commandButton value="Log out" action="login.xhtml" />
+    </h:form>
+</h:body>
+</html>

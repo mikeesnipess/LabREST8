@@ -1,0 +1,30 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+<h:body>
+    <h:form>
+        <h2>Evaluations for Teacher: #{teacherEvaluationBean.loggedInTeacher.username}</h2>
+
+        <h:dataTable value="#{teacherEvaluationBean.teacherEvaluations}" var="evaluation" border="1">
+            <h:column>
+                <f:facet name="header">Activity</f:facet>
+                #{evaluation.activity}
+            </h:column>
+            <h:column>
+                <f:facet name="header">Activity Type</f:facet>
+                #{evaluation.activityType}
+            </h:column>
+            <h:column>
+                <f:facet name="header">Grade</f:facet>
+                #{evaluation.grade}
+            </h:column>
+            <h:column>
+                <f:facet name="header">Comment</f:facet>
+                #{evaluation.comment}
+            </h:column>
+        </h:dataTable>
+
+        <h:commandButton value="Log out" action="login.xhtml" />
+    </h:form>
+</h:body>
+</html>

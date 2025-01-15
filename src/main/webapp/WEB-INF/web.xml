@@ -1,0 +1,56 @@
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
+                             https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
+         version="6.0">
+    <login-config>
+        <auth-method>FORM</auth-method>
+        <realm-name>jdbc/myDatabase</realm-name>
+        <form-login-config>
+            <form-login-page>/login.jsp</form-login-page>
+            <form-error-page>/error.jsp</form-error-page>
+        </form-login-config>
+    </login-config>
+
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>SecuredResources</web-resource-name>
+            <url-pattern>/api/evaluations/getAll</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>Admin</role-name>
+            <role-name>Student</role-name>
+        </auth-constraint>
+    </security-constraint>
+
+    <!-- Specific security constraint for /getAll (only Admin can access) -->
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>AdminResources</web-resource-name>
+            <url-pattern>/api/*</url-pattern> <!-- Specific path for /getAll -->
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>Admin</role-name> <!-- Only Admin allowed -->
+        </auth-constraint>
+    </security-constraint>
+
+    <security-role>
+        <role-name>Admin</role-name>
+    </security-role>
+    <security-role>
+        <role-name>Student</role-name>
+    </security-role>
+
+    <resource-ref>
+        <description>
+            Resource reference for database connection factory.
+        </description>
+        <res-ref-name>jdbc/myDatabase</res-ref-name> <!-- JNDI Name -->
+        <res-type>javax.sql.DataSource</res-type>
+        <res-auth>Container</res-auth>
+    </resource-ref>
+
+
+
+
+</web-app>
