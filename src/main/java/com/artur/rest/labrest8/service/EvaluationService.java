@@ -1,5 +1,6 @@
 package com.artur.rest.labrest8.service;
 
+import com.artur.rest.labrest8.beans.EvaluationBean;
 import com.artur.rest.labrest8.dto.EvaluationDTO;
 import com.artur.rest.labrest8.entities.Evaluation;
 import com.artur.rest.labrest8.entities.User;
@@ -25,6 +26,10 @@ public class EvaluationService {
     private EntityManager em;
 
     @Context SecurityContext securityContext;
+
+    @Inject
+    private EvaluationBean evaluationBean;
+
     @Inject
     public void setEvaluationService(EntityManagerProducer emp) {
         this.em = emp.getEntityManager();
@@ -40,7 +45,10 @@ public class EvaluationService {
         evaluation.setRegistrationNumber(generateRegistrationNumber());  // Generate a registration number
 
         // Begin transaction and save to the database
-        em.getTransaction().begin();
+
+        if (!em.getTransaction().isActive()) {
+            em.getTransaction().begin();
+        }
         em.persist(evaluation);
         em.getTransaction().commit();
     }
@@ -96,6 +104,18 @@ public class EvaluationService {
                 .setParameter("teacherId", teacherId)
                 .getResultList();
     }
+
+    public User getTeacherById(UUID id) {
+        return em.find(User.class, id);
+    }
+
+    public User getUserByName(String name) {
+        String jpql = "SELECT u FROM User u WHERE u.username = :name";
+        return em.createQuery(jpql, User.class)
+                .setParameter("name", name)
+                .getSingleResult();
+    }
+
 
     public Evaluation getEvaluationById(UUID id) {
         Evaluation some = em.find(Evaluation.class, id);

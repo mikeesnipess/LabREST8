@@ -1,5 +1,7 @@
 package com.artur.rest.labrest8.resources;
 
+import com.artur.rest.labrest8.beans.AuthBean;
+import com.artur.rest.labrest8.beans.EvaluationBean;
 import com.artur.rest.labrest8.dto.EvaluationDTO;
 import com.artur.rest.labrest8.dto.UserDTO;
 import com.artur.rest.labrest8.entities.Evaluation;
@@ -28,6 +30,10 @@ public class EvaluationResource {
 
     @Inject
     private EvaluationService evaluationService;
+    @Inject
+    private EvaluationBean evaluationBean;
+    @Inject
+    private AuthBean authBean;
 
     @Inject
     private UserService userService;
@@ -38,7 +44,7 @@ public class EvaluationResource {
     public List<EvaluationDTO> getAllEvaluations() {
         return evaluationService.getAllEvaluationsDTO();
     }
-
+//    GET Teachers for dropdown studentEvaluation.jsp page
     @GET
     @Path("/teachers")
     @Produces(MediaType.APPLICATION_JSON)
@@ -90,4 +96,31 @@ public class EvaluationResource {
         }
         return Response.status(Response.Status.NOT_FOUND).build();
     }
+
+    @POST
+    @Path("/submitEvaluation")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @RolesAllowed({"Admin", "Student"})
+    public Response submitEvaluation(
+            @FormParam("activity") String activity,
+            @FormParam("activityType") String activityType,
+            @FormParam("grade") int grade,
+            @FormParam("comment") String comment,
+            @FormParam("teacher") UUID receivedTeacher
+    ) {
+        Evaluation evaluation = new Evaluation();
+        evaluation.setActivity(activity);
+        evaluation.setActivityType(activityType);
+        evaluation.setGrade(grade);
+        evaluation.setComment(comment);
+        User teacher = evaluationService.getTeacherById(receivedTeacher);
+        evaluation.setTeacher(teacher);
+        User student = evaluationService.getUserByName(securityContext.getUserPrincipal().getName());
+        evaluation.setStudent(student);
+
+        evaluationService.submitEvaluation(evaluation);  // Save to DB
+        return Response.ok("Evaluation submitted successfully!").build();
+    }
+
+
 }

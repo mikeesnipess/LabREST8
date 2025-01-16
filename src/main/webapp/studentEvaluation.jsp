@@ -50,7 +50,7 @@
 <body>
 <!-- Form for submitting the evaluation -->
 <h1>Submit Evaluation</h1>
-<form action="submitEvaluation.jsp" method="post">
+<form action="api/evaluations/submitEvaluation" method="post">
     <table>
         <!-- Input field for activity -->
         <tr>
