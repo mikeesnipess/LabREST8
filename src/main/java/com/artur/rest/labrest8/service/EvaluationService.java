@@ -10,6 +10,8 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.SecurityContext;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,6 +24,7 @@ public class EvaluationService {
 
     private EntityManager em;
 
+    @Context SecurityContext securityContext;
     @Inject
     public void setEvaluationService(EntityManagerProducer emp) {
         this.em = emp.getEntityManager();
@@ -54,6 +57,12 @@ public class EvaluationService {
     }
 
     public List<EvaluationDTO> getAllEvaluationsDTO() {
+
+        if (securityContext.getUserPrincipal() != null) {
+            // Get the authenticated user's principal name
+            String username = securityContext.getUserPrincipal().getName();
+            System.out.println(username);
+        }
         List<Evaluation> evaluations = em.createQuery("SELECT e FROM Evaluation e", Evaluation.class).getResultList();
 
         if (evaluations != null && !evaluations.isEmpty()) {

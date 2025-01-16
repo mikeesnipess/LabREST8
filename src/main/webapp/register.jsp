@@ -7,23 +7,23 @@
 </head>
 <body>
 <h1>Register</h1>
-<form action="register" method="post">
+<form action="${pageContext.request.contextPath}/api/auth/register" method="get">
   <table>
     <tr>
       <td><label for="username">Username:</label></td>
-      <td><input type="text" id="username" name="username" value="${authBean.username}" /></td>
+      <td><input type="text" id="username" name="username" /></td>
     </tr>
     <tr>
       <td><label for="password">Password:</label></td>
-      <td><input type="password" id="password" name="password" value="${authBean.password}" /></td>
+      <td><input type="password" id="password" name="password" /></td>
     </tr>
     <tr>
       <td><label for="role">Role:</label></td>
       <td>
         <select id="role" name="role">
-          <option value="Student" ${authBean.role == 'Student' ? 'selected' : ''}>Student</option>
-          <option value="Teacher" ${authBean.role == 'Teacher' ? 'selected' : ''}>Teacher</option>
-          <option value="Admin" ${authBean.role == 'Admin' ? 'selected' : ''}>Admin</option>
+          <option value="Student">Student</option>
+          <option value="Teacher">Teacher</option>
+          <option value="Admin">Admin</option>
         </select>
       </td>
     </tr>

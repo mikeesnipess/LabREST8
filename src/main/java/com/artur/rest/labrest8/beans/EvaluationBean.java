@@ -4,6 +4,7 @@ import com.artur.rest.labrest8.entities.Evaluation;
 import com.artur.rest.labrest8.entities.User;
 import com.artur.rest.labrest8.service.EvaluationService;
 import com.artur.rest.labrest8.service.UserService;
+import jakarta.annotation.ManagedBean;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.SessionScoped;
 import jakarta.inject.Inject;

@@ -19,6 +19,9 @@ public class UserRole {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Column(name ="username",unique = true, nullable = false)
+    private String username;
+
     // Getters and Setters
     public UUID getId() {
         return id;
@@ -42,5 +45,13 @@ public class UserRole {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

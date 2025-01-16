@@ -1,25 +1,36 @@
 package com.artur.rest.labrest8.resources;
 
 import com.artur.rest.labrest8.dto.EvaluationDTO;
+import com.artur.rest.labrest8.dto.UserDTO;
 import com.artur.rest.labrest8.entities.Evaluation;
+import com.artur.rest.labrest8.entities.User;
 import com.artur.rest.labrest8.service.EvaluationService;
+import com.artur.rest.labrest8.service.UserService;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.SecurityContext;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Path("/evaluations")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class EvaluationResource {
 
+    @Context SecurityContext securityContext;
+
     @Inject
     private EvaluationService evaluationService;
+
+    @Inject
+    private UserService userService;
 
     @GET
     @Path("/getAll")
@@ -27,6 +38,17 @@ public class EvaluationResource {
     public List<EvaluationDTO> getAllEvaluations() {
         return evaluationService.getAllEvaluationsDTO();
     }
+
+    @GET
+    @Path("/teachers")
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<UserDTO> getAllTeachers() {
+        List<User> teachers = userService.getAllTeachers();
+        return teachers.stream()
+                .map(user -> new UserDTO(user.getId(), user.getUsername()))
+                .collect(Collectors.toList());
+    }
+
 
     @GET
     @Path("/getEvaluationId/{id}")
