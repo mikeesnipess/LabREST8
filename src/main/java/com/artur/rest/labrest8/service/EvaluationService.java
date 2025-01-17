@@ -6,17 +6,14 @@ import com.artur.rest.labrest8.entities.Evaluation;
 import com.artur.rest.labrest8.entities.User;
 import com.artur.rest.labrest8.repository.EntityManagerProducer;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.faces.context.FacesContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.persistence.EntityManager;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.SecurityContext;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Named
@@ -65,12 +62,6 @@ public class EvaluationService {
     }
 
     public List<EvaluationDTO> getAllEvaluationsDTO() {
-
-        if (securityContext.getUserPrincipal() != null) {
-            // Get the authenticated user's principal name
-            String username = securityContext.getUserPrincipal().getName();
-            System.out.println(username);
-        }
         List<Evaluation> evaluations = em.createQuery("SELECT e FROM Evaluation e", Evaluation.class).getResultList();
 
         if (evaluations != null && !evaluations.isEmpty()) {
@@ -78,6 +69,8 @@ public class EvaluationService {
             return evaluations.stream()
                     .map(ev -> new EvaluationDTO(
                             ev.getId(),
+                            ev.getStudent().getUsername(),
+                            ev.getTeacher().getUsername(),
                             ev.getActivity(),
                             ev.getActivityType(),
                             ev.getGrade(),
@@ -89,6 +82,78 @@ public class EvaluationService {
         return null;
     }
 
+    public List<EvaluationDTO> getDashboardTeacherEvaluations() {
+        // Retrieve all evaluations
+        List<EvaluationDTO> evaluations = getAllEvaluationsDTO();
+
+        // Group evaluations by teacher
+        Map<String, List<EvaluationDTO>> evaluationsByTeacher = evaluations.stream()
+                .collect(Collectors.groupingBy(EvaluationDTO::getTeacherName));
+
+        // Calculate aggregate data for each teacher
+        List<TeacherStatistics> teacherStatistics = new ArrayList<>();
+        for (Map.Entry<String, List<EvaluationDTO>> entry : evaluationsByTeacher.entrySet()) {
+            String teacherName = entry.getKey();
+            List<EvaluationDTO> teacherEvaluations = entry.getValue();
+
+            int totalGrades = teacherEvaluations.stream()
+                    .mapToInt(EvaluationDTO::getGrade)
+                    .sum();
+
+            double averageGrade = teacherEvaluations.stream()
+                    .mapToInt(EvaluationDTO::getGrade)
+                    .average()
+                    .orElse(0.0);
+
+            String activityDetails = teacherEvaluations.stream()
+                    .map(EvaluationDTO::getActivity)
+                    .collect(Collectors.joining(", "));
+
+            teacherStatistics.add(new TeacherStatistics(teacherName, totalGrades, averageGrade, activityDetails));
+        }
+
+        // Sort teachers by total grades in descending order
+        List<TeacherStatistics> sortedTeachers = teacherStatistics.stream()
+                .sorted(Comparator.comparingInt(TeacherStatistics::getTotalGrades).reversed())
+                .limit(10) // Get top 10
+                .collect(Collectors.toList());
+
+        // Convert to EvaluationDTO
+        return sortedTeachers.stream()
+                .map(ts -> new EvaluationDTO(ts.getTeacherName(), ts.getTotalGrades(), ts.getActivityDetails()))
+                .collect(Collectors.toList());
+    }
+
+    private static class TeacherStatistics {
+        private final String teacherName;
+        private final int totalGrades;
+        private final double averageGrade;
+        private final String activityDetails;
+
+        public TeacherStatistics(String teacherName, int totalGrades, double averageGrade, String activityDetails) {
+            this.teacherName = teacherName;
+            this.totalGrades = totalGrades;
+            this.averageGrade = averageGrade;
+            this.activityDetails = activityDetails;
+        }
+
+        public String getTeacherName() {
+            return teacherName;
+        }
+
+        public int getTotalGrades() {
+            return totalGrades;
+        }
+
+        public double getAverageGrade() {
+            return averageGrade;
+        }
+
+        public String getActivityDetails() {
+            return activityDetails;
+        }
+    }
+
     public LocalDateTime getWindowEndTime() {
         // Example logic: End time is 10 minutes from now
         return LocalDateTime.now().plusMinutes(10);
@@ -98,14 +163,16 @@ public class EvaluationService {
         return "REG" + System.currentTimeMillis(); // Simple unique registration number generator
     }
 
-    public List<Evaluation> getEvaluationsByTeacherId(UUID teacherId) {
+    public List<Evaluation> getEvaluationsByTeacherId() {
+        User teacher = getUserByName(securityContext.getUserPrincipal().getName());
+        UUID teacherId = teacher.getId();
         return em.createQuery(
                         "SELECT e FROM Evaluation e WHERE e.teacher.id = :teacherId", Evaluation.class)
                 .setParameter("teacherId", teacherId)
                 .getResultList();
     }
 
-    public User getTeacherById(UUID id) {
+    public User getUserById(UUID id) {
         return em.find(User.class, id);
     }
 

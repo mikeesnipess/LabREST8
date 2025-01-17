@@ -96,7 +96,7 @@ public class AuthBean implements Serializable {
         try {
             userService.registerUser(newUser); // Save user to the database
             loggedInUser = newUser; // Set the newly registered user as the logged-in user
-            return "login.jsp"; // Redirect to the login page
+            return "login"; // Redirect to the login page
         } catch (Exception e) {
             // Optionally, add a message for registration failure
             return "register.jsp"; // Stay on registration page

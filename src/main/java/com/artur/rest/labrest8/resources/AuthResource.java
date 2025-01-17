@@ -2,12 +2,16 @@ package com.artur.rest.labrest8.resources;
 
 import com.artur.rest.labrest8.beans.AuthBean;
 import jakarta.inject.Inject;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.SecurityContext;
+import jakarta.ws.rs.core.*;
+import org.glassfish.jersey.process.internal.RequestContext;
 
+import java.io.IOException;
 import java.net.URI;
 import java.security.Principal;
 
@@ -20,20 +24,32 @@ public class AuthResource {
     @Context
     SecurityContext securityContext;
 
+    @Context
+    RequestContext requestContext;
+
     @Inject
     private AuthBean authBean;
 
     @GET
     @Path("/register")
-    public String registerNewUser(@QueryParam("username") String username,
-                                  @QueryParam("password") String password,
-                                  @QueryParam("role") String role) {
+    public Response registerNewUser(@QueryParam("username") String username,
+                                    @QueryParam("password") String password,
+                                    @QueryParam("role") String role) {
         System.out.println("Registering new user: " + username);
         authBean.setUsername(username);
         authBean.setPassword(password);
         authBean.setRole(role);
-        return authBean.register();
+
+        String resultPage = authBean.register();
+        if(resultPage.equals("login")) {
+            return Response.seeOther(URI.create("auth/" + resultPage)).build();
+        }
+        else
+        {
+            return Response.seeOther(URI.create("/LabREST8_war_exploded/" + resultPage)).build();
+        }
     }
+
 
     @GET
     @Path("/login")
@@ -50,4 +66,12 @@ public class AuthResource {
                 .header("Received-Content", responseContent)  // Optionally, you can pass the received content as a header
                 .build();
     }
+//
+//    @GET
+//    @Path("/logout")
+//    public Response logoutUser() {
+//        this.securityContext = null;
+//        // Redirect to the login page or a confirmation page
+//        return Response.seeOther(URI.create("/LabREST8_war_exploded/index.jsp")).build();
+//    }
 }

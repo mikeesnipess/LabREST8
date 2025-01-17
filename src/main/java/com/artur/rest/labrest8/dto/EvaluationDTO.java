@@ -5,6 +5,8 @@ import java.util.UUID;
 
 public class EvaluationDTO {
     private UUID id;
+    private String studentName;
+    private String teacherName;
     private String activity;
     private String activityType;
     private int grade;
@@ -21,6 +23,23 @@ public class EvaluationDTO {
         this.comment = comment;
         this.registrationNumber = registrationNumber;
 //        this.timestamp = timestamp;
+    }
+
+    public EvaluationDTO(UUID id,String studentName, String teacherName, String activity, String activityType, int grade, String comment, String registrationNumber) {
+        this.id = id;
+        this.studentName = studentName;
+        this.teacherName = teacherName;
+        this.activity = activity;
+        this.activityType = activityType;
+        this.grade = grade;
+        this.comment = comment;
+        this.registrationNumber = registrationNumber;
+    }
+
+    public EvaluationDTO(String teacherName, int grade, String activity) {
+        this.teacherName = teacherName;
+        this.grade = grade;
+        this.activity = activity;
     }
 
     // Getters and Setters
@@ -71,6 +90,11 @@ public class EvaluationDTO {
     public void setRegistrationNumber(String registrationNumber) {
         this.registrationNumber = registrationNumber;
     }
+
+    public String getStudentName() {return studentName;}
+    public void setStudentName(String studentName) {this.studentName = studentName;}
+    public String getTeacherName() {return teacherName;}
+    public void setTeacherName(String teacherName) {this.teacherName = teacherName;}
 
 //    public LocalDateTime getTimestamp() {
 //        return timestamp;

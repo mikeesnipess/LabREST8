@@ -2,6 +2,7 @@ package com.artur.rest.labrest8.resources;
 
 import com.artur.rest.labrest8.beans.AuthBean;
 import com.artur.rest.labrest8.beans.EvaluationBean;
+import com.artur.rest.labrest8.beans.TeacherEvaluationBean;
 import com.artur.rest.labrest8.dto.EvaluationDTO;
 import com.artur.rest.labrest8.dto.UserDTO;
 import com.artur.rest.labrest8.entities.Evaluation;
@@ -9,7 +10,6 @@ import com.artur.rest.labrest8.entities.User;
 import com.artur.rest.labrest8.service.EvaluationService;
 import com.artur.rest.labrest8.service.UserService;
 import jakarta.annotation.security.RolesAllowed;
-import jakarta.faces.context.FacesContext;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
@@ -17,6 +17,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
 
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -33,6 +34,8 @@ public class EvaluationResource {
     @Inject
     private EvaluationBean evaluationBean;
     @Inject
+    private TeacherEvaluationBean teacherEvaluationBean;
+    @Inject
     private AuthBean authBean;
 
     @Inject
@@ -44,7 +47,27 @@ public class EvaluationResource {
     public List<EvaluationDTO> getAllEvaluations() {
         return evaluationService.getAllEvaluationsDTO();
     }
-//    GET Teachers for dropdown studentEvaluation.jsp page
+
+    @GET
+    @Path("/dashboard")
+    @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed({"Admin","Student","Teacher"})
+    public Response getDashboard() {
+        List<EvaluationDTO> evaluations = evaluationService.getDashboardTeacherEvaluations();
+
+//        return Response.seeOther(URI.create("/LabREST8_war_exploded/dashboard.jsp"))
+//                .header("Content-Type", "application/json")
+//                .build();
+
+        return Response.ok(evaluations)
+                .header("Content-Type", "application/json")
+                .build();
+
+    }
+
+
+
+
     @GET
     @Path("/teachers")
     @Produces(MediaType.APPLICATION_JSON)
@@ -67,12 +90,52 @@ public class EvaluationResource {
         return Response.status(Response.Status.NOT_FOUND).build();
     }
 
+    @GET
+    @Path("/getTeacherEvaluations")
+    @RolesAllowed({"Admin","Teacher"})
+    public List<EvaluationDTO> getTeacherEvaluations() {
+        List<Evaluation> receivedEvaluation = evaluationService.getEvaluationsByTeacherId();
+        return receivedEvaluation.stream()
+                .map(teacher -> new EvaluationDTO(teacher.getId(),
+                        teacher.getActivity(),
+                        teacher.getActivityType(),
+                        teacher.getGrade(),teacher.
+                        getComment(),teacher.
+                        getRegistrationNumber()))
+                .collect(Collectors.toList());
+    }
+
     @POST
     @Path("/addEvaluation")
     @RolesAllowed("Admin") // Only admin role can access
     public Response addEvaluation(Evaluation evaluation) {
         EvaluationDTO createdEvaluation = evaluationService.addEvaluation(evaluation);
         return Response.status(Response.Status.CREATED).entity(createdEvaluation).build();
+    }
+
+    @POST
+    @Path("/submitEvaluation")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @RolesAllowed({"Admin", "Student"})
+    public Response submitEvaluation(
+            @FormParam("activity") String activity,
+            @FormParam("activityType") String activityType,
+            @FormParam("grade") int grade,
+            @FormParam("comment") String comment,
+            @FormParam("teacher") UUID receivedTeacher
+    ) {
+        Evaluation evaluation = new Evaluation();
+        evaluation.setActivity(activity);
+        evaluation.setActivityType(activityType);
+        evaluation.setGrade(grade);
+        evaluation.setComment(comment);
+        User teacher = evaluationService.getUserById(receivedTeacher);
+        evaluation.setTeacher(teacher);
+        User student = evaluationService.getUserByName(securityContext.getUserPrincipal().getName());
+        evaluation.setStudent(student);
+
+        evaluationService.submitEvaluation(evaluation);  // Save to DB
+        return Response.ok("Evaluation submitted successfully!").build();
     }
 
     @PUT
@@ -97,30 +160,7 @@ public class EvaluationResource {
         return Response.status(Response.Status.NOT_FOUND).build();
     }
 
-    @POST
-    @Path("/submitEvaluation")
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @RolesAllowed({"Admin", "Student"})
-    public Response submitEvaluation(
-            @FormParam("activity") String activity,
-            @FormParam("activityType") String activityType,
-            @FormParam("grade") int grade,
-            @FormParam("comment") String comment,
-            @FormParam("teacher") UUID receivedTeacher
-    ) {
-        Evaluation evaluation = new Evaluation();
-        evaluation.setActivity(activity);
-        evaluation.setActivityType(activityType);
-        evaluation.setGrade(grade);
-        evaluation.setComment(comment);
-        User teacher = evaluationService.getTeacherById(receivedTeacher);
-        evaluation.setTeacher(teacher);
-        User student = evaluationService.getUserByName(securityContext.getUserPrincipal().getName());
-        evaluation.setStudent(student);
 
-        evaluationService.submitEvaluation(evaluation);  // Save to DB
-        return Response.ok("Evaluation submitted successfully!").build();
-    }
 
 
 }

@@ -39,7 +39,7 @@
 <div class="error-container">
   <h1>Login Failed</h1>
   <p>Invalid username or password. Please try again.</p>
-  <a href="login.jsp">Go back to Login</a>
+  <a href="login">Go back to Login</a>
 </div>
 </body>
 </html>

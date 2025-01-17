@@ -22,7 +22,7 @@ public class TeacherEvaluationBean implements Serializable {
 
     public void loadEvaluations() {
         if (loggedInTeacher != null) {
-            teacherEvaluations = evaluationService.getEvaluationsByTeacherId(loggedInTeacher.getId());
+            teacherEvaluations = evaluationService.getEvaluationsByTeacherId();
         }
     }
 
